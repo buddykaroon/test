@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication , QMainWindow, QMenuBar, QMenu, QAction
-from PyQt5.QtGui import QIcon, QImage, QPainter, QPen
+from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QTabletEvent
 from PyQt5.QtCore import Qt, QPoint
 import sys
 
@@ -16,7 +16,7 @@ class Window(QMainWindow):
         self.setGeometry(top, left, width, height)
         self.image = QImage(self.size(), QImage.Format_RGB32)
         self.image.fill(Qt.white)
-
+        self.baseSize = 2
         self.drawing = False
         self.brushSize = 2
         self.brushColor = Qt.black
@@ -54,6 +54,29 @@ class Window(QMainWindow):
         redAction = QAction(QIcon("exit.png"), "Red Color", self)
         redAction.setShortcut("Ctrl+T")
         brushColor.addAction(redAction)
+
+    def tabletEvent(self, tabletEvent):
+        self.pen_x = tabletEvent.globalX()
+        self.pen_y = tabletEvent.globalY()
+        self.pen_pressure = int(tabletEvent.pressure() * 100)
+        self.brushSize = self.baseSize + ((self.pen_pressure + 1)/20)
+        print(self.pen_pressure)
+        if tabletEvent.type() == QTabletEvent.TabletPress:
+            self.pen_is_down = True
+            print("TabletPress event")
+        elif tabletEvent.type() == QTabletEvent.TabletMove:
+            self.pen_is_down = True
+            print("TabletMove event")
+        elif tabletEvent.type() == QTabletEvent.TabletRelease:
+            self.pen_is_down = False
+            print("TabletRelease event")
+        if self.pen_is_down:
+            print(" Pen is down.")
+        else:
+            print(" Pen is up.")
+        tabletEvent.accept()
+        self.update()
+
     def mousePressEvent (self, event):
         if event.button() == Qt.LeftButton:
             self.drawing = True;
