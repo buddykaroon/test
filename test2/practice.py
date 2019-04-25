@@ -132,6 +132,7 @@ class Writer(QMainWindow):
             self.form_widget.save_text()
         if signal == "Open":
             self.form_widget.open_text()
+
 app = QtWidgets.QApplication(sys.argv)
 
 b_window = Writer()
