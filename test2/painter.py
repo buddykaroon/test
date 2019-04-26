@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication , QMainWindow, QMenuBar, QMenu, QAction
-from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QTabletEvent
+from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QTabletEvent, QColor
 from PyQt5.QtCore import Qt, QPoint
 import sys
 
@@ -16,9 +16,9 @@ class Window(QMainWindow):
         self.setGeometry(top, left, width, height)
         self.image = QImage(self.size(), QImage.Format_RGB32)
         self.image.fill(Qt.white)
-        self.baseSize = 2
+        self.baseSize = 10
         self.drawing = False
-        self.brushSize = 2
+        self.brushSize = 10
         self.brushColor = Qt.black
         self.lastPoint = QPoint()
 
@@ -59,7 +59,8 @@ class Window(QMainWindow):
         self.pen_x = tabletEvent.globalX()
         self.pen_y = tabletEvent.globalY()
         self.pen_pressure = int(tabletEvent.pressure() * 100)
-        self.brushSize = self.baseSize + ((self.pen_pressure + 1)/20)
+        #self.brushSize = self.baseSize + ((self.pen_pressure + 1)/20)
+        self.brushColor = QColor(0,0,0,self.pen_pressure);
         print(self.pen_pressure)
         if tabletEvent.type() == QTabletEvent.TabletPress:
             self.pen_is_down = True
@@ -75,6 +76,10 @@ class Window(QMainWindow):
         else:
             print(" Pen is up.")
         tabletEvent.accept()
+        painter = QPainter(self.image)
+        painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        painter.drawLine(self.lastPoint, tabletEvent.pos())
+        self.lastPoint = tabletEvent.pos()
         self.update()
 
     def mousePressEvent (self, event):
@@ -84,10 +89,7 @@ class Window(QMainWindow):
             print(self.lastPoint)
     def mouseMoveEvent(self, event):
         if (event.buttons() & Qt.LeftButton) & self.drawing:
-            painter = QPainter(self.image)
-            painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-            painter.drawLine(self.lastPoint, event.pos())
-            self.lastPoint = event.pos()
+
             self.update()
     def mouseReleaseEvent(self, event):
         if (event.button() == Qt.LeftButton):
